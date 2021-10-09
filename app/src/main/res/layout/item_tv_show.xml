@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/tv_show_content"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/material_margin_normal"
+    android:orientation="vertical"
+    tools:background="@color/colorPrimaryDark"
+    tools:ignore="RtlHardcoded">
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/cover_image"
+        android:layout_width="@dimen/tv_show_icon_width"
+        android:layout_height="@dimen/tv_show_icon_height"
+        android:scaleType="centerCrop"
+        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize5Percent"
+        tools:src="" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/material_margin_super_small">
+
+        <TextView
+            android:id="@+id/tv_show_name"
+            android:layout_width="@dimen/tv_show_title_width"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:ellipsize="end"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            tools:text="Show name"
+            tools:textColor="@color/white" />
+
+        <androidx.appcompat.widget.AppCompatRatingBar
+            android:id="@+id/tv_show_rating"
+            style="@style/Base.Widget.AppCompat.RatingBar.Small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_gravity="end"
+            android:isIndicator="true"
+            android:numStars="5"
+            android:progressBackgroundTint="@color/colorControlNormal"
+            android:stepSize="0.5"
+            tools:rating="5" />
+
+    </RelativeLayout>
+</LinearLayout>
