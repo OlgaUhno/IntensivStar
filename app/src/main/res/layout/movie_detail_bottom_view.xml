@@ -1,0 +1,86 @@
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/material_margin_small"
+        android:layout_marginTop="@dimen/material_margin_small">
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/material_margin_small"
+                android:text="@string/production"
+                android:textColor="@color/white"
+                android:textSize="14sp"
+                tools:text="Production"
+                tools:textColor="@color/white" />
+
+            <TextView
+                android:id="@+id/production"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:text=""
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                tools:text="Warner"
+                tools:textColor="@color/white" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/material_margin_small"
+                android:text="@string/genres"
+                android:textColor="@color/white"
+                android:textSize="14sp"
+                tools:text="Жанр"
+                tools:textColor="@color/white" />
+
+            <TextView
+                android:id="@+id/genres"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:text=""
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                tools:text="Action"
+                tools:textColor="@color/white" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/material_margin_small"
+                android:text="@string/release"
+                android:textColor="@color/white"
+                android:textSize="14sp"
+                tools:text="Release"
+                tools:textColor="@color/white" />
+
+            <TextView
+                android:id="@+id/release"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:text=""
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                tools:text="2020"
+                tools:textColor="@color/white" />
+        </TableRow>
+    </TableLayout>
+</merge>

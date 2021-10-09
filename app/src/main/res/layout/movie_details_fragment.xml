@@ -1,12 +1,120 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/blueDark"
     tools:context="ru.androidschool.intensiv.ui.movie_details.MovieDetailsFragment">
 
-    <TextView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_marginStart="@dimen/material_margin_super_small"
+        android:background="@color/blueDark"
+        android:overScrollMode="never"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/poster_image"
+                    android:layout_width="@dimen/poster_icon_width"
+                    android:layout_height="@dimen/poster_icon_width"
+                    android:layout_marginBottom="@dimen/material_margin_super_small"
+                    android:scaleType="centerCrop"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize10Percent"
+                    tools:src="" />
+
+                <ImageButton
+                    android:id="@+id/back_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:background="@color/transparent"
+                    android:src="@drawable/arrow_back" />
+
+                <TextView
+                    android:id="@+id/movie_name"
+                    android:layout_width="@dimen/movie_name_width"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/poster_image"
+                    android:layout_alignParentStart="true"
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    android:textColor="@color/white"
+                    android:textSize="20sp"
+                    tools:text="Show name"
+                    tools:textColor="@color/white" />
+
+                <androidx.appcompat.widget.AppCompatCheckBox
+                    android:id="@+id/favorite"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@+id/movie_name"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="@dimen/material_margin_super_small"
+                    android:button="@drawable/ic_favorite" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/material_margin_super_small">
+
+                <Button
+                    android:id="@+id/watch_button"
+                    android:layout_width="@dimen/watch_button_width"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/watch_button_background"
+                    android:text="@string/watch"
+                    android:textColor="@android:color/white" />
+
+                <androidx.appcompat.widget.AppCompatRatingBar
+                    android:id="@+id/movie_rating"
+                    style="@style/Base.Widget.AppCompat.RatingBar.Small"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="@dimen/material_margin_super_small"
+                    android:isIndicator="true"
+                    android:numStars="5"
+                    android:progressBackgroundTint="@color/colorControlNormal"
+                    android:stepSize="0.5"
+                    tools:rating="5" />
+            </RelativeLayout>
+
+            <TextView
+                android:id="@+id/description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/material_margin_small"
+                android:layout_marginBottom="@dimen/material_margin_small"
+                android:textColor="@color/white"
+                android:textSize="15sp"
+                tools:text=""
+                tools:textColor="@color/white" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/artists_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:scrollbars="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                tools:itemCount="4"
+                tools:listitem="@layout/item_artist" />
+
+            <include layout="@layout/movie_detail_bottom_view" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 </FrameLayout>
