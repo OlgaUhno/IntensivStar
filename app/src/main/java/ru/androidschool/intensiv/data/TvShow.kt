@@ -5,3 +5,4 @@ class TvShow(
     voteAverage: Double,
     posterPath: String?
 ) : MovieBase(title, voteAverage, posterPath)
+
