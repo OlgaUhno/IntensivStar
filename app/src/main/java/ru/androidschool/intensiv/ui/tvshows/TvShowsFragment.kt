@@ -3,12 +3,17 @@ package ru.androidschool.intensiv.ui.tvshows
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
 import kotlinx.android.synthetic.main.tv_shows_fragment.*
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import ru.androidschool.intensiv.R
-import ru.androidschool.intensiv.data.MockRepository
+import ru.androidschool.intensiv.data.TvShowsResponseDto
+import ru.androidschool.intensiv.network.TvShowApiClient
+import ru.androidschool.intensiv.util.Constants
+import timber.log.Timber
 
 class TvShowsFragment : Fragment(R.layout.tv_shows_fragment) {
 
@@ -18,18 +23,31 @@ class TvShowsFragment : Fragment(R.layout.tv_shows_fragment) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        adapter.clear()
 
-        tvShows_recycler_view.adapter = adapter.apply { addAll(listOf()) }
+        val getPopularShows =
+            TvShowApiClient.apiClient.getPopularShows()
 
-        // TODO: check if details view should be opened by click
-        val tvShowsList =
-            MockRepository.getTvShows().map {
-                TvShowItem(
-                    it
-                ) { movie -> }
-            }.toList()
+        getPopularShows.enqueue(object : Callback<TvShowsResponseDto> {
+            override fun onFailure(call: Call<TvShowsResponseDto>, e: Throwable) {
+                Timber.e(e, "Failed get popular shows")
+            }
 
-        tvShows_recycler_view.adapter = adapter.apply { addAll(tvShowsList) }
+            override fun onResponse(
+                call: Call<TvShowsResponseDto>,
+                response: Response<TvShowsResponseDto>
+            ) {
+                val shows = response.body()?.results
+                shows?.let {
+                    val newShowsList = shows.map {
+
+                        TvShowItem(it) { show -> }
+                    }.toList()
+
+                    tvShows_recycler_view.adapter = adapter.apply { addAll(newShowsList) }
+                }
+            }
+        })
     }
 
     companion object {

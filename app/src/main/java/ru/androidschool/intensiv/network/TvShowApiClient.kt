@@ -8,16 +8,16 @@ import ru.androidschool.intensiv.BuildConfig
 import ru.androidschool.intensiv.util.Constants
 import ru.androidschool.intensiv.util.HttpLogging
 
-object MovieApiClient {
+object TvShowApiClient {
     private var client: OkHttpClient = getOkHttpClient()
 
-    val apiClient: MovieApiInterface by lazy {
+    val apiClient: TvShowApiInterface by lazy {
         val retrofit = Retrofit.Builder()
             .baseUrl(BuildConfig.BASE_URL)
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
-        return@lazy retrofit.create(MovieApiInterface::class.java)
+        return@lazy retrofit.create(TvShowApiInterface::class.java)
     }
 }
