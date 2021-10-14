@@ -1,10 +1,8 @@
 package ru.androidschool.intensiv.data
 
-open class MovieBase(
-    var title: String? = "",
-    var voteAverage: Double = 0.0,
-    var posterPath: String? = ""
-) {
+abstract class MovieBase : PosterBase() {
+    open val voteAverage: Double? = 0.0
+
     val rating: Float
-        get() = voteAverage.div(2).toFloat()
+        get() = voteAverage?.div(2)?.toFloat() ?: 0.0f
 }

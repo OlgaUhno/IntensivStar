@@ -5,6 +5,7 @@
 
     <string name="main_title">Что будете смотреть\nсегодня?</string>
     <string name="recommended">Рекомендуем</string>
+    <string name="now_playing">Сейчас Смотрят</string>
     <string name="popular">Популярные</string>
     <string name="upcoming">Новинки</string>
 

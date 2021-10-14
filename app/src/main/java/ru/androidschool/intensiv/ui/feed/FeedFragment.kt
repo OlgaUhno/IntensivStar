@@ -10,10 +10,15 @@ import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
 import kotlinx.android.synthetic.main.feed_fragment.*
 import kotlinx.android.synthetic.main.feed_header.*
 import kotlinx.android.synthetic.main.search_toolbar.view.*
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import ru.androidschool.intensiv.R
-import ru.androidschool.intensiv.data.MockRepository
 import ru.androidschool.intensiv.data.Movie
+import ru.androidschool.intensiv.data.MoviesResponse
+import ru.androidschool.intensiv.network.MovieApiClient
 import ru.androidschool.intensiv.ui.afterTextChanged
+import ru.androidschool.intensiv.util.Constants
 import timber.log.Timber
 
 class FeedFragment : Fragment(R.layout.feed_fragment) {
@@ -33,7 +38,8 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        Timber.d("FeedFragment created")
+        adapter.clear()
         search_toolbar.search_edit_text.afterTextChanged {
             Timber.d(it.toString())
             if (it.toString().length > MIN_LENGTH) {
@@ -41,41 +47,105 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
             }
         }
 
-        // Используя Мок-репозиторий получаем фэйковый список фильмов
-        val moviesList = listOf(
-            MainCardContainer(
-                R.string.recommended,
-                MockRepository.getMovies().map {
-                    MovieItem(it) { movie ->
-                        openMovieDetails(
-                            movie
+        val getNowPlayingMovies =
+            MovieApiClient.apiClient.getNowPlayingMovies(Constants.API_KEY, Constants.LANGUAGE)
+
+        getNowPlayingMovies.enqueue(object : Callback<MoviesResponse> {
+            override fun onFailure(call: Call<MoviesResponse>, e: Throwable) {
+                Timber.e(e, "Failed get top now playing movies")
+            }
+
+            override fun onResponse(
+                call: Call<MoviesResponse>,
+                response: Response<MoviesResponse>
+            ) {
+
+                val movies = response.body()?.results
+                movies?.let {
+                    val moviesList = listOf(
+                        MainCardContainer(
+                            R.string.now_playing,
+                            movies.map {
+                                MovieItem(it) { movie ->
+                                    openMovieDetails(
+                                        movie
+                                    )
+                                }
+                            }.toList()
                         )
-                    }
-                }.toList()
-            )
-        )
+                    )
+                    movies_recycler_view.adapter = adapter.apply { addAll(moviesList) }
+                }
+            }
+        })
 
-        movies_recycler_view.adapter = adapter.apply { addAll(moviesList) }
+        val getTopRatedMovies =
+            MovieApiClient.apiClient.getTopRatedMovies(Constants.API_KEY, Constants.LANGUAGE)
 
-        // Используя Мок-репозиторий получаем фэйковый список фильмов
-        // Чтобы отобразить второй ряд фильмов
-        val newMoviesList = listOf(
-            MainCardContainer(
-                R.string.upcoming,
-                MockRepository.getMovies().map {
-                    MovieItem(it) { movie ->
-                        openMovieDetails(movie)
-                    }
-                }.toList()
-            )
-        )
+        getTopRatedMovies.enqueue(object : Callback<MoviesResponse> {
+            override fun onFailure(call: Call<MoviesResponse>, e: Throwable) {
+                Timber.e(e, "Failed get top rated movies")
+            }
 
-        adapter.apply { addAll(newMoviesList) }
+            override fun onResponse(
+                call: Call<MoviesResponse>,
+                response: Response<MoviesResponse>
+            ) {
+
+                val movies = response.body()?.results
+                movies?.let {
+                    val moviesList = listOf(
+                        MainCardContainer(
+                            R.string.recommended,
+                            movies.map {
+                                MovieItem(it) { movie ->
+                                    openMovieDetails(
+                                        movie
+                                    )
+                                }
+                            }.toList()
+                        )
+                    )
+                    movies_recycler_view.adapter = adapter.apply { addAll(moviesList) }
+                }
+            }
+        })
+
+        val getUpcomingMovies =
+            MovieApiClient.apiClient.getUpcomingMovies(Constants.API_KEY, Constants.LANGUAGE)
+
+        getUpcomingMovies.enqueue(object : Callback<MoviesResponse> {
+            override fun onFailure(call: Call<MoviesResponse>, e: Throwable) {
+                Timber.e(e, "Failed get upcoming movies")
+            }
+
+            override fun onResponse(
+                call: Call<MoviesResponse>,
+                response: Response<MoviesResponse>
+            ) {
+
+                val movies = response.body()?.results
+                movies?.let {
+                    val newMoviesList = listOf(
+                        MainCardContainer(
+                            R.string.upcoming,
+                            movies.map {
+                                MovieItem(it) { movie ->
+                                    openMovieDetails(movie)
+                                }
+                            }.toList()
+                        )
+                    )
+
+                    adapter.apply { addAll(newMoviesList) }
+                }
+            }
+        })
     }
 
     private fun openMovieDetails(movie: Movie) {
         val bundle = Bundle()
-        bundle.putString(KEY_TITLE, movie.title)
+        bundle.putInt(KEY_ID, movie.id ?: -1)
         findNavController().navigate(R.id.movie_details_fragment, bundle, options)
     }
 
@@ -98,5 +168,6 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
         const val MIN_LENGTH = 3
         const val KEY_TITLE = "title"
         const val KEY_SEARCH = "search"
+        const val KEY_ID = "id"
     }
 }

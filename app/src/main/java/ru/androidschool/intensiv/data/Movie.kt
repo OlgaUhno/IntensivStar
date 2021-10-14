@@ -1,7 +1,14 @@
 package ru.androidschool.intensiv.data
 
-open class Movie(
-    title: String? = "",
-    voteAverage: Double = 0.0,
-    posterPath: String? = ""
-) : MovieBase (title,voteAverage, posterPath)
+import com.google.gson.annotations.SerializedName
+
+class Movie(
+    @SerializedName("id")
+    val id: Int?,
+    @SerializedName("title")
+    val title: String?,
+    @SerializedName("poster_path")
+    override val posterPath: String?,
+    @SerializedName("vote_average")
+    override val voteAverage: Double?
+) : MovieBase()
