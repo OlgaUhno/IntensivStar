@@ -13,7 +13,7 @@
     tools:background="@color/blueDark"
     tools:ignore="RtlHardcoded">
 
-    <com.google.android.material.imageview.ShapeableImageView
+    <ru.androidschool.intensiv.ui.components.ShapeableImageViewExt
         android:id="@+id/image_preview"
         android:layout_width="@dimen/movie_card_width"
         android:layout_height="@dimen/movie_card_height"

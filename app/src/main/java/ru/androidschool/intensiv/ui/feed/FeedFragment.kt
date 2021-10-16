@@ -19,6 +19,7 @@ import ru.androidschool.intensiv.data.MovieDto
 import ru.androidschool.intensiv.data.MoviesResponseDto
 import ru.androidschool.intensiv.network.MovieApiClient
 import ru.androidschool.intensiv.ui.afterTextChanged
+import ru.androidschool.intensiv.util.Constants
 import timber.log.Timber
 
 class FeedFragment : Fragment(R.layout.feed_fragment) {
