@@ -1,15 +1,15 @@
 package ru.androidschool.intensiv.ui.watchlist
 
-import com.squareup.picasso.Picasso
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
 import com.xwray.groupie.kotlinandroidextensions.Item
 import kotlinx.android.synthetic.main.item_with_text.*
 import ru.androidschool.intensiv.R
-import ru.androidschool.intensiv.data.Movie
+import ru.androidschool.intensiv.data.MovieDto
+import ru.androidschool.intensiv.ui.loadImage
 
 class MoviePreviewItem(
-    private val content: Movie,
-    private val onClick: (movie: Movie) -> Unit
+    private val content: MovieDto,
+    private val onClick: (movie: MovieDto) -> Unit
 ) : Item() {
 
     override fun getLayout() = R.layout.item_small
@@ -18,9 +18,6 @@ class MoviePreviewItem(
         viewHolder.image_preview.setOnClickListener {
             onClick.invoke(content)
         }
-        // TODO Получать из модели
-        Picasso.get()
-            .load("https://www.kinopoisk.ru/images/film_big/1143242.jpg")
-            .into(viewHolder.image_preview)
+        viewHolder.image_preview.loadImage("https://www.kinopoisk.ru/images/film_big/1143242.jpg")
     }
 }

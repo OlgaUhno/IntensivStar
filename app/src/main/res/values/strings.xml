@@ -5,6 +5,7 @@
 
     <string name="main_title">Что будете смотреть\nсегодня?</string>
     <string name="recommended">Рекомендуем</string>
+    <string name="now_playing">Сейчас Смотрят</string>
     <string name="popular">Популярные</string>
     <string name="upcoming">Новинки</string>
 
@@ -18,6 +19,11 @@
 
     <string name="tv_show">Телесериалы</string>
     <string name="close">закрыть</string>
+    <string name="watch">Смотреть</string>
+
+    <string name="production">Студия</string>
+    <string name="genres">Жанр</string>
+    <string name="release">Год</string>
 
     <string-array name="tab_titles">
         <item>23\n Понравилось</item>
