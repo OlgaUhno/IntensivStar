@@ -1,5 +1,6 @@
 package ru.androidschool.intensiv.network
 
+import io.reactivex.Observable
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Query
@@ -12,19 +13,19 @@ interface MovieApiInterface {
     fun getTopRatedMovies(
         @Query("api_key") apiKey: String = BuildConfig.THE_MOVIE_DATABASE_API,
         @Query("language") language: String = Constants.LANGUAGE
-    ): Call<MoviesResponseDto>
+    ): Observable<MoviesResponseDto>
 
     @GET("movie/upcoming")
     fun getUpcomingMovies(
         @Query("api_key") apiKey: String = BuildConfig.THE_MOVIE_DATABASE_API,
         @Query("language") language: String = Constants.LANGUAGE
-    ): Call<MoviesResponseDto>
+    ): Observable<MoviesResponseDto>
 
     @GET("movie/now_playing")
     fun getNowPlayingMovies(
         @Query("api_key") apiKey: String = BuildConfig.THE_MOVIE_DATABASE_API,
         @Query("language") language: String = Constants.LANGUAGE
-    ): Call<MoviesResponseDto>
+    ): Observable<MoviesResponseDto>
 
     @GET("search/movie")
     fun searchByQuery(

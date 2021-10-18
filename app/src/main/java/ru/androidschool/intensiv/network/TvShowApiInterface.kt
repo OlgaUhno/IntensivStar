@@ -1,6 +1,6 @@
 package ru.androidschool.intensiv.network
 
-import retrofit2.Call
+import io.reactivex.Observable
 import retrofit2.http.GET
 import retrofit2.http.Query
 import ru.androidschool.intensiv.BuildConfig
@@ -12,5 +12,5 @@ interface TvShowApiInterface {
     fun getPopularShows(
         @Query("api_key") apiKey: String = BuildConfig.THE_MOVIE_DATABASE_API,
         @Query("language") language: String = Constants.LANGUAGE
-    ): Call<TvShowsResponseDto>
+    ): Observable<TvShowsResponseDto>
 }
