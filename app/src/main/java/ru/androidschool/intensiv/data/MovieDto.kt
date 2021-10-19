@@ -8,7 +8,7 @@ data class MovieDto(
     @SerializedName("title")
     val title: String?,
     @SerializedName("poster_path")
-    override val posterPath: String?,
+    val posterPath: String?,
     @SerializedName("vote_average")
-    override val voteAverage: Double?
-) : MovieBase()
+    val voteAverage: Double?
+)

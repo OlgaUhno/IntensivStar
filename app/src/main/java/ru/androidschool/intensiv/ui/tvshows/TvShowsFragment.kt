@@ -5,14 +5,11 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
+import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.tv_shows_fragment.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import ru.androidschool.intensiv.R
-import ru.androidschool.intensiv.data.TvShowsResponseDto
 import ru.androidschool.intensiv.network.TvShowApiClient
-import ru.androidschool.intensiv.util.Constants
+import ru.androidschool.intensiv.util.addSchedulers
 import timber.log.Timber
 
 class TvShowsFragment : Fragment(R.layout.tv_shows_fragment) {
@@ -21,33 +18,32 @@ class TvShowsFragment : Fragment(R.layout.tv_shows_fragment) {
         GroupAdapter<GroupieViewHolder>()
     }
 
+    private lateinit var compositeDisposable: CompositeDisposable
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         adapter.clear()
 
-        val getPopularShows =
+        compositeDisposable = CompositeDisposable()
+
+        compositeDisposable.add(
             TvShowApiClient.apiClient.getPopularShows()
+                .compose(addSchedulers())
+                .subscribe({ response ->
+                    response.results.let { results ->
+                        val newShowsList = results.map {
+                            TvShowItem(it) { show -> }
+                        }.toList()
 
-        getPopularShows.enqueue(object : Callback<TvShowsResponseDto> {
-            override fun onFailure(call: Call<TvShowsResponseDto>, e: Throwable) {
-                Timber.e(e, "Failed get popular shows")
-            }
+                        tvShows_recycler_view.adapter = adapter.apply { addAll(newShowsList) }
+                    }
+                }, { error -> Timber.e(error, "Failed get popular shows") })
+        )
+    }
 
-            override fun onResponse(
-                call: Call<TvShowsResponseDto>,
-                response: Response<TvShowsResponseDto>
-            ) {
-                val shows = response.body()?.results
-                shows?.let {
-                    val newShowsList = shows.map {
-
-                        TvShowItem(it) { show -> }
-                    }.toList()
-
-                    tvShows_recycler_view.adapter = adapter.apply { addAll(newShowsList) }
-                }
-            }
-        })
+    override fun onDestroyView() {
+        super.onDestroyView()
+        compositeDisposable.clear()
     }
 
     companion object {

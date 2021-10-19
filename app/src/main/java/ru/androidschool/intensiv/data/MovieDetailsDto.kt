@@ -8,9 +8,9 @@ data class MovieDetailsDto(
     @SerializedName("title")
     val title: String?,
     @SerializedName("poster_path")
-    override val posterPath: String?,
+    val posterPath: String?,
     @SerializedName("vote_average")
-    override val voteAverage: Double?,
+    val voteAverage: Double?,
     @SerializedName("overview")
     var overview: String? = "",
     @SerializedName("production_companies")
@@ -21,4 +21,4 @@ data class MovieDetailsDto(
     var genres: Array<GenresDto>,
     @SerializedName("credits")
     var credits: CreditsResponseDto
-) : MovieBase()
+)

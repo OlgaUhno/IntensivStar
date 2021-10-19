@@ -6,7 +6,8 @@ import kotlinx.android.synthetic.main.item_with_text.*
 import ru.androidschool.intensiv.R
 import ru.androidschool.intensiv.data.MovieDto
 import ru.androidschool.intensiv.ui.loadImage
-import timber.log.Timber
+import ru.androidschool.intensiv.util.getFullPosterPath
+import ru.androidschool.intensiv.util.getRating
 
 class MovieItem(
     private val content: MovieDto,
@@ -17,11 +18,10 @@ class MovieItem(
 
     override fun bind(viewHolder: GroupieViewHolder, position: Int) {
         viewHolder.description.text = content.title
-        viewHolder.movie_rating.rating = content.rating
+        viewHolder.movie_rating.rating = getRating(content.voteAverage)
         viewHolder.content.setOnClickListener {
             onClick.invoke(content)
         }
-        viewHolder.image_preview.loadImage(content.poster)
-        Timber.d("image path ${content.poster}")
+        viewHolder.image_preview.loadImage(getFullPosterPath(content.posterPath))
     }
 }

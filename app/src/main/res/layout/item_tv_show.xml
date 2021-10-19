@@ -10,7 +10,7 @@
     tools:background="@color/colorPrimaryDark"
     tools:ignore="RtlHardcoded">
 
-    <ru.androidschool.intensiv.ui.components.ShapeableImageViewExt
+    <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/cover_image"
         android:layout_width="@dimen/tv_show_icon_width"
         android:layout_height="@dimen/tv_show_icon_height"

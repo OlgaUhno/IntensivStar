@@ -8,18 +8,15 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
+import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.feed_fragment.*
 import kotlinx.android.synthetic.main.feed_header.*
 import kotlinx.android.synthetic.main.search_toolbar.view.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import ru.androidschool.intensiv.R
 import ru.androidschool.intensiv.data.MovieDto
-import ru.androidschool.intensiv.data.MoviesResponseDto
 import ru.androidschool.intensiv.network.MovieApiClient
 import ru.androidschool.intensiv.ui.afterTextChanged
-import ru.androidschool.intensiv.util.Constants
+import ru.androidschool.intensiv.util.addSchedulers
 import timber.log.Timber
 
 class FeedFragment : Fragment(R.layout.feed_fragment) {
@@ -37,6 +34,8 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
         }
     }
 
+    private lateinit var compositeDisposable: CompositeDisposable
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Timber.d("FeedFragment created")
@@ -48,53 +47,49 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
             }
         }
 
-        val getNowPlayingMovies =
+        compositeDisposable = CompositeDisposable()
+
+        compositeDisposable.add(
             MovieApiClient.apiClient.getNowPlayingMovies()
+                .compose(addSchedulers())
+                .subscribe({ response ->
+                    addResults(
+                        response.results,
+                        R.string.now_playing
+                    )
+                }, { error -> onFailure(error, "Failed get top now playing movies") })
+        )
 
-        getNowPlayingMovies.enqueue(object : Callback<MoviesResponseDto> {
-            override fun onFailure(call: Call<MoviesResponseDto>, e: Throwable) {
-                Timber.e(e, "Failed get top now playing movies")
-            }
-
-            override fun onResponse(
-                call: Call<MoviesResponseDto>,
-                response: Response<MoviesResponseDto>
-            ) {
-                addResults(response.body()?.results, R.string.now_playing)
-            }
-        })
-
-        val getTopRatedMovies =
+        compositeDisposable.add(
             MovieApiClient.apiClient.getTopRatedMovies()
+                .compose(addSchedulers())
+                .subscribe({ response ->
+                    addResults(
+                        response.results,
+                        R.string.recommended
+                    )
+                }, { error -> onFailure(error, "Failed get top rated movies") })
+        )
 
-        getTopRatedMovies.enqueue(object : Callback<MoviesResponseDto> {
-            override fun onFailure(call: Call<MoviesResponseDto>, e: Throwable) {
-                Timber.e(e, "Failed get top rated movies")
-            }
+        compositeDisposable.add(
+            MovieApiClient.apiClient.getTopRatedMovies()
+                .compose(addSchedulers())
+                .subscribe({ response ->
+                    addResults(
+                        response.results,
+                        R.string.upcoming
+                    )
+                }, { error -> onFailure(error, "Failed get upcoming movies") })
+        )
+    }
 
-            override fun onResponse(
-                call: Call<MoviesResponseDto>,
-                response: Response<MoviesResponseDto>
-            ) {
-                addResults(response.body()?.results, R.string.recommended)
-            }
-        })
+    override fun onDestroyView() {
+        super.onDestroyView()
+        compositeDisposable.clear()
+    }
 
-        val getUpcomingMovies =
-            MovieApiClient.apiClient.getUpcomingMovies()
-
-        getUpcomingMovies.enqueue(object : Callback<MoviesResponseDto> {
-            override fun onFailure(call: Call<MoviesResponseDto>, e: Throwable) {
-                Timber.e(e, "Failed get upcoming movies")
-            }
-
-            override fun onResponse(
-                call: Call<MoviesResponseDto>,
-                response: Response<MoviesResponseDto>
-            ) {
-                addResults(response.body()?.results, R.string.upcoming)
-            }
-        })
+    private fun onFailure(e: Throwable, message: String) {
+        Timber.e(e, message)
     }
 
     private fun addResults(result: List<MovieDto>?, @StringRes title: Int) {
