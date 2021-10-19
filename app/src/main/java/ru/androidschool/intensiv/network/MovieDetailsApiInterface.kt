@@ -1,6 +1,6 @@
 package ru.androidschool.intensiv.network
 
-import io.reactivex.Observable
+import io.reactivex.Single
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -15,5 +15,5 @@ interface MovieDetailsApiInterface {
         @Query("api_key") apiKey: String = BuildConfig.THE_MOVIE_DATABASE_API,
         @Query("language") language: String = Constants.LANGUAGE,
         @Query("append_to_response") appendToResponse: String = "credits"
-    ): Observable<MovieDetailsDto>
+    ): Single<MovieDetailsDto>
 }

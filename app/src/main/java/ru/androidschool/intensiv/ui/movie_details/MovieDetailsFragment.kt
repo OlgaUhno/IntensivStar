@@ -5,9 +5,7 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.movie_detail_bottom_view.*
 import kotlinx.android.synthetic.main.movie_details_fragment.*
 import ru.androidschool.intensiv.R
@@ -17,6 +15,7 @@ import ru.androidschool.intensiv.network.MovieDetailsApiClient
 import ru.androidschool.intensiv.ui.feed.FeedFragment
 import ru.androidschool.intensiv.ui.loadImage
 import ru.androidschool.intensiv.util.MovieDetailsConvertor
+import ru.androidschool.intensiv.util.addSchedulers
 import timber.log.Timber
 
 class MovieDetailsFragment : Fragment(R.layout.movie_details_fragment) {
@@ -52,8 +51,7 @@ class MovieDetailsFragment : Fragment(R.layout.movie_details_fragment) {
         compositeDisposable = CompositeDisposable()
         compositeDisposable.add(
             MovieDetailsApiClient.apiClient.getMovieDetails(movieId)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
+                .compose(addSchedulers())
                 .map { dto: MovieDetailsDto? -> MovieDetailsConvertor.toViewObject(dto) }
                 .subscribe({ response ->
                     addResult(

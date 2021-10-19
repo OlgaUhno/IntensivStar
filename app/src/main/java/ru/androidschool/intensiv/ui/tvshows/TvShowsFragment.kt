@@ -5,12 +5,11 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.tv_shows_fragment.*
 import ru.androidschool.intensiv.R
 import ru.androidschool.intensiv.network.TvShowApiClient
+import ru.androidschool.intensiv.util.addSchedulers
 import timber.log.Timber
 
 class TvShowsFragment : Fragment(R.layout.tv_shows_fragment) {
@@ -29,8 +28,7 @@ class TvShowsFragment : Fragment(R.layout.tv_shows_fragment) {
 
         compositeDisposable.add(
             TvShowApiClient.apiClient.getPopularShows()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
+                .compose(addSchedulers())
                 .subscribe({ response ->
                     response.results.let { results ->
                         val newShowsList = results.map {

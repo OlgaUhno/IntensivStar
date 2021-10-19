@@ -8,9 +8,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.feed_fragment.*
 import kotlinx.android.synthetic.main.feed_header.*
 import kotlinx.android.synthetic.main.search_toolbar.view.*
@@ -18,6 +16,7 @@ import ru.androidschool.intensiv.R
 import ru.androidschool.intensiv.data.MovieDto
 import ru.androidschool.intensiv.network.MovieApiClient
 import ru.androidschool.intensiv.ui.afterTextChanged
+import ru.androidschool.intensiv.util.addSchedulers
 import timber.log.Timber
 
 class FeedFragment : Fragment(R.layout.feed_fragment) {
@@ -52,9 +51,7 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
 
         compositeDisposable.add(
             MovieApiClient.apiClient.getNowPlayingMovies()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .take(1)
+                .compose(addSchedulers())
                 .subscribe({ response ->
                     addResults(
                         response.results,
@@ -65,9 +62,7 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
 
         compositeDisposable.add(
             MovieApiClient.apiClient.getTopRatedMovies()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .take(1)
+                .compose(addSchedulers())
                 .subscribe({ response ->
                     addResults(
                         response.results,
@@ -78,8 +73,7 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
 
         compositeDisposable.add(
             MovieApiClient.apiClient.getTopRatedMovies()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
+                .compose(addSchedulers())
                 .subscribe({ response ->
                     addResults(
                         response.results,
