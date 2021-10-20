@@ -12,10 +12,10 @@ import ru.androidschool.intensiv.R
 import ru.androidschool.intensiv.data.MovieDetailsDto
 import ru.androidschool.intensiv.data.MovieDetailsVo
 import ru.androidschool.intensiv.network.MovieDetailsApiClient
-import ru.androidschool.intensiv.ui.feed.FeedFragment
 import ru.androidschool.intensiv.ui.loadImage
 import ru.androidschool.intensiv.util.MovieDetailsConvertor
-import ru.androidschool.intensiv.util.addSchedulers
+import ru.androidschool.intensiv.rx.addSchedulers
+import ru.androidschool.intensiv.util.Constants
 import timber.log.Timber
 
 class MovieDetailsFragment : Fragment(R.layout.movie_details_fragment) {
@@ -29,7 +29,7 @@ class MovieDetailsFragment : Fragment(R.layout.movie_details_fragment) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            movieId = it.getInt(FeedFragment.KEY_ID)
+            movieId = it.getInt(Constants.KEY_ID)
             Timber.i("show details for $movieId")
         }
     }
