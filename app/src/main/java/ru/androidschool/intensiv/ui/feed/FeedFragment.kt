@@ -5,18 +5,25 @@ import android.view.*
 import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.navOptions
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
+import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.functions.Function3
 import kotlinx.android.synthetic.main.feed_fragment.*
 import kotlinx.android.synthetic.main.feed_header.*
+import kotlinx.android.synthetic.main.progress_indicator.*
 import kotlinx.android.synthetic.main.search_toolbar.view.*
 import ru.androidschool.intensiv.R
 import ru.androidschool.intensiv.data.MovieDto
+import ru.androidschool.intensiv.data.MoviesResponseDto
 import ru.androidschool.intensiv.network.MovieApiClient
+import ru.androidschool.intensiv.rx.addProgress
 import ru.androidschool.intensiv.ui.afterTextChanged
-import ru.androidschool.intensiv.util.addSchedulers
+import ru.androidschool.intensiv.rx.addSchedulers
+import ru.androidschool.intensiv.ui.navigationOptions
+import ru.androidschool.intensiv.util.Constants
+import ru.androidschool.intensiv.util.MovieCategories
 import timber.log.Timber
 
 class FeedFragment : Fragment(R.layout.feed_fragment) {
@@ -25,21 +32,13 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
         GroupAdapter<GroupieViewHolder>()
     }
 
-    private val options = navOptions {
-        anim {
-            enter = R.anim.slide_in_right
-            exit = R.anim.slide_out_left
-            popEnter = R.anim.slide_in_left
-            popExit = R.anim.slide_out_right
-        }
-    }
-
     private lateinit var compositeDisposable: CompositeDisposable
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Timber.d("FeedFragment created")
         adapter.clear()
+
         search_toolbar.search_edit_text.afterTextChanged {
             Timber.d(it.toString())
             if (it.toString().length > MIN_LENGTH) {
@@ -49,37 +48,26 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
 
         compositeDisposable = CompositeDisposable()
 
-        compositeDisposable.add(
-            MovieApiClient.apiClient.getNowPlayingMovies()
-                .compose(addSchedulers())
-                .subscribe({ response ->
-                    addResults(
-                        response.results,
-                        R.string.now_playing
-                    )
-                }, { error -> onFailure(error, "Failed get top now playing movies") })
-        )
+        val playNowSource = prepareSource(MovieApiClient.apiClient.getNowPlayingMovies())
+        val topRatedSource = prepareSource(MovieApiClient.apiClient.getTopRatedMovies())
+        val upcomingSource = prepareSource(MovieApiClient.apiClient.getUpcomingMovies())
 
         compositeDisposable.add(
-            MovieApiClient.apiClient.getTopRatedMovies()
-                .compose(addSchedulers())
-                .subscribe({ response ->
-                    addResults(
-                        response.results,
-                        R.string.recommended
+            Single.zip(
+                playNowSource, topRatedSource, upcomingSource,
+                Function3<MoviesResponseDto, MoviesResponseDto, MoviesResponseDto, HashMap<MovieCategories, List<MovieDto>>> { now, top, upcoming ->
+                    hashMapOf(
+                        MovieCategories.TOP to top.results,
+                        MovieCategories.NOW to now.results,
+                        MovieCategories.UPCOMING to upcoming.results
                     )
-                }, { error -> onFailure(error, "Failed get top rated movies") })
-        )
-
-        compositeDisposable.add(
-            MovieApiClient.apiClient.getTopRatedMovies()
-                .compose(addSchedulers())
-                .subscribe({ response ->
-                    addResults(
-                        response.results,
-                        R.string.upcoming
-                    )
-                }, { error -> onFailure(error, "Failed get upcoming movies") })
+                }
+            ).compose(addSchedulers())
+                .compose(addProgress(progress_bar))
+                .subscribe({ result ->
+                    movies_recycler_view.adapter =
+                        adapter.apply { addAll(getListOfResults(result)) }
+                }, { error -> Timber.e(error, "Failed get movies") })
         )
     }
 
@@ -88,38 +76,44 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
         compositeDisposable.clear()
     }
 
-    private fun onFailure(e: Throwable, message: String) {
-        Timber.e(e, message)
+    private fun prepareSource(source: Single<MoviesResponseDto>) = source.compose(addSchedulers())
+
+    private fun getListOfResults(result: HashMap<MovieCategories, List<MovieDto>>): List<MainCardContainer> =
+        result.entries.map { toCardContainer(it.value, getCardTitleResId(it.key)) }
+
+    private fun getCardTitleResId(category: MovieCategories): Int {
+        return when (category) {
+            MovieCategories.TOP -> R.string.recommended
+            MovieCategories.NOW -> R.string.now_playing
+            MovieCategories.UPCOMING -> R.string.upcoming
+        }
     }
 
-    private fun addResults(result: List<MovieDto>?, @StringRes title: Int) {
-        result?.let {
-            val resultList = listOf(
-                MainCardContainer(
-                    title,
-                    result.map {
-                        MovieItem(it) { movie ->
-                            openMovieDetails(movie)
-                        }
-                    }.toList()
-                )
-            )
-
-            movies_recycler_view.adapter = adapter.apply { addAll(resultList) }
-        }
+    private fun toCardContainer(
+        result: List<MovieDto>,
+        @StringRes title: Int
+    ): MainCardContainer {
+        return MainCardContainer(
+            title,
+            result.map {
+                MovieItem(it) { movie ->
+                    openMovieDetails(movie)
+                }
+            }.toList()
+        )
     }
 
     private fun openMovieDetails(movie: MovieDto) {
         val bundle = Bundle()
         // TODO: change to use safe arguments
-        bundle.putInt(KEY_ID, movie.id ?: -1)
-        findNavController().navigate(R.id.movie_details_fragment, bundle, options)
+        bundle.putInt(Constants.KEY_ID, movie.id ?: -1)
+        findNavController().navigate(R.id.movie_details_fragment, bundle, navigationOptions)
     }
 
     private fun openSearch(searchText: String) {
         val bundle = Bundle()
         bundle.putString(KEY_SEARCH, searchText)
-        findNavController().navigate(R.id.search_dest, bundle, options)
+        findNavController().navigate(R.id.search_dest, bundle, navigationOptions)
     }
 
     override fun onStop() {
@@ -135,6 +129,5 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
         const val MIN_LENGTH = 3
         const val KEY_TITLE = "title"
         const val KEY_SEARCH = "search"
-        const val KEY_ID = "id"
     }
 }
