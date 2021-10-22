@@ -6,9 +6,11 @@ import androidx.fragment.app.Fragment
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
 import io.reactivex.disposables.CompositeDisposable
+import kotlinx.android.synthetic.main.progress_indicator.*
 import kotlinx.android.synthetic.main.tv_shows_fragment.*
 import ru.androidschool.intensiv.R
 import ru.androidschool.intensiv.network.TvShowApiClient
+import ru.androidschool.intensiv.rx.addProgress
 import ru.androidschool.intensiv.rx.addSchedulers
 import timber.log.Timber
 
@@ -28,7 +30,8 @@ class TvShowsFragment : Fragment(R.layout.tv_shows_fragment) {
 
         compositeDisposable.add(
             TvShowApiClient.apiClient.getPopularShows()
-                .compose(addSchedulers(shows_progress_bar))
+                .compose(addSchedulers())
+                .compose(addProgress(progress_bar))
                 .subscribe({ response ->
                     response.results.let { results ->
                         val newShowsList = results.map {

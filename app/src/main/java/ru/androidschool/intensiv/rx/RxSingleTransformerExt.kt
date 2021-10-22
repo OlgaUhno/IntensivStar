@@ -5,13 +5,16 @@ import io.reactivex.SingleTransformer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 
-fun <R> addSchedulers(progress: View? = null): SingleTransformer<R, R> {
+fun <R> addSchedulers(): SingleTransformer<R, R> {
     return SingleTransformer {
         it.observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(Schedulers.io())
-            .doOnSubscribe {
-                progress?.visibility = View.VISIBLE
-            }
+    }
+}
+
+fun <R> addProgress(progress: View? = null): SingleTransformer<R, R> {
+    return SingleTransformer {
+        it.doOnSubscribe { progress?.visibility = View.VISIBLE }
             .doFinally { progress?.visibility = View.GONE }
     }
 }

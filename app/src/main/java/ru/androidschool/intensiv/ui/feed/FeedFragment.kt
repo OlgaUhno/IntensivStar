@@ -12,15 +12,18 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.functions.Function3
 import kotlinx.android.synthetic.main.feed_fragment.*
 import kotlinx.android.synthetic.main.feed_header.*
+import kotlinx.android.synthetic.main.progress_indicator.*
 import kotlinx.android.synthetic.main.search_toolbar.view.*
 import ru.androidschool.intensiv.R
 import ru.androidschool.intensiv.data.MovieDto
 import ru.androidschool.intensiv.data.MoviesResponseDto
 import ru.androidschool.intensiv.network.MovieApiClient
+import ru.androidschool.intensiv.rx.addProgress
 import ru.androidschool.intensiv.ui.afterTextChanged
 import ru.androidschool.intensiv.rx.addSchedulers
 import ru.androidschool.intensiv.ui.navigationOptions
 import ru.androidschool.intensiv.util.Constants
+import ru.androidschool.intensiv.util.MovieCategories
 import timber.log.Timber
 
 class FeedFragment : Fragment(R.layout.feed_fragment) {
@@ -52,16 +55,18 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
         compositeDisposable.add(
             Single.zip(
                 playNowSource, topRatedSource, upcomingSource,
-                Function3<MoviesResponseDto, MoviesResponseDto, MoviesResponseDto, List<MainCardContainer>> { now, top, upcoming ->
-                    listOf(
-                        toCardContainer(now.results, R.string.now_playing),
-                        toCardContainer(top.results, R.string.recommended),
-                        toCardContainer(upcoming.results, R.string.upcoming)
+                Function3<MoviesResponseDto, MoviesResponseDto, MoviesResponseDto, HashMap<MovieCategories, List<MovieDto>>> { now, top, upcoming ->
+                    hashMapOf(
+                        MovieCategories.TOP to top.results,
+                        MovieCategories.NOW to now.results,
+                        MovieCategories.UPCOMING to upcoming.results
                     )
                 }
-            ).compose(addSchedulers(movies_progress_bar))
+            ).compose(addSchedulers())
+                .compose(addProgress(progress_bar))
                 .subscribe({ result ->
-                    movies_recycler_view.adapter = adapter.apply { addAll(result) }
+                    movies_recycler_view.adapter =
+                        adapter.apply { addAll(getListOfResults(result)) }
                 }, { error -> Timber.e(error, "Failed get movies") })
         )
     }
@@ -72,6 +77,17 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
     }
 
     private fun prepareSource(source: Single<MoviesResponseDto>) = source.compose(addSchedulers())
+
+    private fun getListOfResults(result: HashMap<MovieCategories, List<MovieDto>>): List<MainCardContainer> =
+        result.entries.map { toCardContainer(it.value, getCardTitleResId(it.key)) }
+
+    private fun getCardTitleResId(category: MovieCategories): Int {
+        return when (category) {
+            MovieCategories.TOP -> R.string.recommended
+            MovieCategories.NOW -> R.string.now_playing
+            MovieCategories.UPCOMING -> R.string.upcoming
+        }
+    }
 
     private fun toCardContainer(
         result: List<MovieDto>,

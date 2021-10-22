@@ -9,9 +9,11 @@ import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.feed_header.*
 import kotlinx.android.synthetic.main.fragment_search.*
+import kotlinx.android.synthetic.main.progress_indicator.*
 import ru.androidschool.intensiv.R
 import ru.androidschool.intensiv.data.MovieDto
 import ru.androidschool.intensiv.network.MovieApiClient
+import ru.androidschool.intensiv.rx.addProgress
 import ru.androidschool.intensiv.rx.addSchedulers
 import ru.androidschool.intensiv.ui.feed.FeedFragment.Companion.KEY_SEARCH
 import ru.androidschool.intensiv.ui.feed.MovieItem
@@ -38,7 +40,8 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         searchTerm?.let {
             compositeDisposable.add(
                 MovieApiClient.apiClient.searchByQuery(query = searchTerm)
-                    .compose(addSchedulers(search_progress_bar))
+                    .compose(addSchedulers())
+                    .compose(addProgress(progress_bar))
                     .subscribe({ response ->
                         response.results.let { results ->
                             val movieList = results.map {
