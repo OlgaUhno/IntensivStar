@@ -11,10 +11,14 @@ import kotlinx.android.synthetic.main.movie_details_fragment.*
 import ru.androidschool.intensiv.R
 import ru.androidschool.intensiv.data.MovieDetailsDto
 import ru.androidschool.intensiv.data.MovieDetailsVo
+import ru.androidschool.intensiv.database.FavoriteMoviesDatabase
+import ru.androidschool.intensiv.database.entities.FavoriteMovie
+import ru.androidschool.intensiv.database.FavoriteMovieDao
 import ru.androidschool.intensiv.network.MovieDetailsApiClient
+import ru.androidschool.intensiv.rx.addCompletableSchedulers
 import ru.androidschool.intensiv.ui.loadImage
-import ru.androidschool.intensiv.util.MovieDetailsConvertor
-import ru.androidschool.intensiv.rx.addSchedulers
+import ru.androidschool.intensiv.util.MovieDetailsConverter
+import ru.androidschool.intensiv.rx.addSingleSchedulers
 import ru.androidschool.intensiv.util.Constants
 import timber.log.Timber
 
@@ -25,6 +29,7 @@ class MovieDetailsFragment : Fragment(R.layout.movie_details_fragment) {
     }
     private lateinit var compositeDisposable: CompositeDisposable
     private var movieId: Int = -1
+    private var posterPath = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,8 +56,8 @@ class MovieDetailsFragment : Fragment(R.layout.movie_details_fragment) {
         compositeDisposable = CompositeDisposable()
         compositeDisposable.add(
             MovieDetailsApiClient.apiClient.getMovieDetails(movieId)
-                .compose(addSchedulers())
-                .map { dto: MovieDetailsDto? -> MovieDetailsConvertor.toViewObject(dto) }
+                .compose(addSingleSchedulers())
+                .map { dto: MovieDetailsDto? -> MovieDetailsConverter.toViewObject(dto) }
                 .subscribe({ response ->
                     addResult(
                         response
@@ -68,6 +73,7 @@ class MovieDetailsFragment : Fragment(R.layout.movie_details_fragment) {
 
     private fun addResult(details: MovieDetailsVo) {
         poster_image.loadImage(details.posterPath)
+        posterPath = details.posterPath
         release.text = details.release
         description.text = details.overview
         movie_rating.rating = details.rating
@@ -75,16 +81,49 @@ class MovieDetailsFragment : Fragment(R.layout.movie_details_fragment) {
         production.text = details.productionCompanies
         genres.text = details.genres
 
-        // TODO: get state from provider or shared preferences
-        favorite.setChecked(true)
+        val db: FavoriteMovieDao = FavoriteMoviesDatabase.get(requireContext()).movieDao()
+
+        db.isMovieExist(movieId).compose(addSingleSchedulers()).subscribe({
+            setFavoriteState(it)
+        }, { error -> Timber.e(error, "Failed get movie from database") })
+
         favorite.setOnCheckedChangeListener { buttonView, isChecked ->
-            // TODO: save value
+            if (isChecked) {
+                db.save(
+                    FavoriteMovie(
+                        movieId,
+                        posterPath
+                    )
+                ).compose(addCompletableSchedulers()).subscribe({
+                    setFavoriteState(true)
+                }, { error ->
+                    setFavoriteState(false)
+                    Timber.e(error, "Failed save movie to database")
+                })
+            } else {
+                db.delete(
+                    FavoriteMovie(
+                        movieId,
+                        posterPath
+                    )
+                ).compose(addCompletableSchedulers())
+                    .subscribe({
+                        setFavoriteState(false)
+                    }, { error ->
+                        setFavoriteState(true)
+                        Timber.e(error, "Failed delete movie from database") })
+            }
         }
+
         details.credits.let { cast ->
             val artistList = cast.map {
                 ArtistItem(it)
             }.toList()
             artists_recycler_view.adapter = adapter.apply { addAll(artistList) }
         }
+    }
+
+    private fun setFavoriteState(isChecked: Boolean) {
+        favorite.setChecked(isChecked)
     }
 }

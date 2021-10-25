@@ -15,5 +15,4 @@
         android:background="@drawable/list_background"
         android:paddingTop="@dimen/material_margin_large"
         android:scrollbars="vertical" />
-
 </FrameLayout>

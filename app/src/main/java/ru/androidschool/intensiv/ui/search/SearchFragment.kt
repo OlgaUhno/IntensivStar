@@ -13,8 +13,8 @@ import kotlinx.android.synthetic.main.progress_indicator.*
 import ru.androidschool.intensiv.R
 import ru.androidschool.intensiv.data.MovieDto
 import ru.androidschool.intensiv.network.MovieApiClient
-import ru.androidschool.intensiv.rx.addProgress
-import ru.androidschool.intensiv.rx.addSchedulers
+import ru.androidschool.intensiv.rx.addSingleProgress
+import ru.androidschool.intensiv.rx.addSingleSchedulers
 import ru.androidschool.intensiv.ui.feed.FeedFragment.Companion.KEY_SEARCH
 import ru.androidschool.intensiv.ui.feed.MovieItem
 import ru.androidschool.intensiv.ui.navigationOptions
@@ -40,8 +40,8 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         searchTerm?.let {
             compositeDisposable.add(
                 MovieApiClient.apiClient.searchByQuery(query = searchTerm)
-                    .compose(addSchedulers())
-                    .compose(addProgress(progress_bar))
+                    .compose(addSingleSchedulers())
+                    .compose(addSingleProgress(progress_bar))
                     .subscribe({ response ->
                         response.results.let { results ->
                             val movieList = results.map {

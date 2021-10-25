@@ -2,7 +2,7 @@ package ru.androidschool.intensiv.util
 
 import ru.androidschool.intensiv.data.*
 
-object MovieDetailsConvertor {
+object MovieDetailsConverter {
 
     fun toViewObject(detailsDto: MovieDetailsDto?): MovieDetailsVo {
         return detailsDto?.let {
