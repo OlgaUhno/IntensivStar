@@ -2,18 +2,22 @@ package ru.androidschool.intensiv.ui.profile
 
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import ru.androidschool.intensiv.ui.watchlist.WatchlistFragment
 
 class ProfileAdapter(
-    fragment: Fragment,
-    private val itemsCount: Int
+    fragment: Fragment
 ) : FragmentStateAdapter(fragment) {
 
     override fun getItemCount(): Int {
-        return itemsCount
+        return arrayList.size
     }
 
-    override fun createFragment(position: Int): Fragment {
-        return WatchlistFragment.newInstance()
+    private val arrayList: ArrayList<Fragment> = ArrayList()
+
+    fun addFragment(fragment: Fragment?) {
+        fragment?.let {
+            arrayList.add(it)
+        }
     }
+
+    override fun createFragment(position: Int): Fragment = arrayList[position]
 }
