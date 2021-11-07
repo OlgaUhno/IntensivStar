@@ -1,5 +1,7 @@
 package ru.androidschool.intensiv.data
 
+import ru.androidschool.intensiv.data.dto.MovieDto
+
 object MockRepository {
     fun getMovies(): List<MovieDto> {
 
@@ -9,7 +11,7 @@ object MockRepository {
                 id = 5,
                 title = "Spider-Man $x",
                 voteAverage = 10.0 - x,
-                posterPath = "https://www.kinopoisk.ru/images/film_big/1143242.jpg"
+                posterPath = "/pUc51UUQb1lMLVVkDCaZVsCo37U.jpg"
             )
             moviesList.add(movie)
         }
